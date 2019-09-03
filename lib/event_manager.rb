@@ -30,9 +30,24 @@ def frequent_signup_hour(reg_dates)
   date_time = DateTime.strptime(reg_date, format)
   hours << date_time.strftime("%H")
   end
-  hour_freq = Hash.new(0).tap { |h| hours.each { |hours| h[hours] += 1 } }
-  hour_freq = hour_freq.sort_by{ |k,v| [-v, k] }
+  hour_freq = Hash.new(0)
+  .tap { |h| hours.each { |hours| h[hours] += 1 } }
+  .sort_by{ |k,v| [-v, k] }
   "#{hour_freq[0][0]}:00 is the most frequent signup hour with #{hour_freq[0][1]} signups"
+end
+
+def frequent_signup_day(reg_dates)
+  weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  days = []
+  format = '%m/%d/%y %k:%M'
+  reg_dates.each do |reg_date|
+    date_time = DateTime.strptime(reg_date, format)
+    days << date_time.wday
+  end
+  day_freq = Hash.new(0)
+  .tap { |h| days.each { |days| h[days] += 1 } }
+  .sort_by{ |k,v| [-v, k] }
+  "#{weekdays[day_freq[0][0]]} is the most frequent signup day with #{day_freq[0][1]} signups"
 end
 
 def legislators_by_zipcode(zip)
@@ -84,3 +99,4 @@ contents.each do |row|
 end
 
 puts frequent_signup_hour(reg_dates)
+puts frequent_signup_day(reg_dates)
