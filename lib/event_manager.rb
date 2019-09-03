@@ -23,6 +23,18 @@ def clean_phone(number)
   number
 end
 
+def frequent_signup_hour(reg_dates)
+  hours = []
+  format = '%m/%d/%y %k:%M'
+  reg_dates.each do |reg_date|
+  date_time = DateTime.strptime(reg_date, format)
+  hours << date_time.strftime("%H")
+  end
+  hour_freq = Hash.new(0).tap { |h| hours.each { |hours| h[hours] += 1 } }
+  hour_freq = hour_freq.sort_by{ |k,v| [-v, k] }
+  "#{hour_freq[0][0]}:00 is the most frequent signup hour with #{hour_freq[0][1]} signups"
+end
+
 def legislators_by_zipcode(zip)
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
   civic_info.key = 'AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw'
@@ -54,18 +66,21 @@ template_letter = File.read "form_letter.erb"
 erb_template = ERB.new template_letter
 
 contents = CSV.open "event_attendees.csv", headers: true, header_converters: :symbol
+reg_dates = []
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
   zipcode = clean_zipcode(row[:zipcode])
   phone = clean_phone(row[:homephone])
-  puts phone
-  legislators = legislators_by_zipcode(zipcode)
+  reg_dates << row[:regdate]
+  # legislators = legislators_by_zipcode(zipcode)
 
-  form_letter = erb_template.result(binding)
+  # form_letter = erb_template.result(binding)
   # Dir.mkdir("output") unless Dir.exists? "output"
 
   # filename = "output/thanks_#{id}.html"
 
   # save_thank_you_letters(id,form_letter)
 end
+
+puts frequent_signup_hour(reg_dates)
